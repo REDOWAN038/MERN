@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/REDOWAN038/MERN#readme",
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "http-errors": "^2.0.0"
   },
   "devDependencies": {
     "morgan": "^1.10.0",
