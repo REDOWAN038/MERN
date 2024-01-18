@@ -1,12 +1,20 @@
 const express = require("express")
 const createError = require('http-errors')
 const morgan = require("morgan")
+const rateLimit = require("express-rate-limit")
 const app = express()
+
+const limiter = rateLimit({
+	windowMs : 1*60*1000,
+	max : 5,
+	message : "too many requests"
+})
 
 // middlewares
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+app.use(limiter)
 
 app.get("/test",(req,res)=>{
     res.status(200).json({
