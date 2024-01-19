@@ -1,7 +1,12 @@
+const connectDB = require("../config/connectDB")
 const app = require("./app")
+const { port } = require("./secret")
 
-const PORT = 3000
-
-app.listen(PORT,()=>{
-    console.log(`server is listening at http://localhost:${PORT}`)
+app.listen(port,async()=>{
+    try {
+        await connectDB()
+        console.log(`server is listening at http://localhost:${port}`)
+    } catch (error) {
+        console.log(error);
+    }
 })
