@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/REDOWAN038/MERN#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "express-rate-limit": "^7.1.5",
