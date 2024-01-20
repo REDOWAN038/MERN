@@ -8,7 +8,7 @@ const data = {
             phone : "01234567891",
         },
         {
-            name : "red2",
+            name : "ibrahim",
             email : "abcd@gmail.com",
             password : "1234",
             address: "sylhet",

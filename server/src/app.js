@@ -4,6 +4,10 @@ const morgan = require("morgan")
 const rateLimit = require("express-rate-limit")
 const app = express()
 
+const userRoutes = require("../routes/userRoutes")
+const seedRoutes = require("../routes/seedRoutes")
+const { errorResponse } = require("../handler/responseHandler")
+
 const limiter = rateLimit({
 	windowMs : 1*60*1000,
 	max : 5,
@@ -15,6 +19,10 @@ app.use(morgan("dev"))
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(limiter)
+
+// routes
+app.use("/api/v1/users",userRoutes)
+app.use("/api/v1/seed",seedRoutes)
 
 app.get("/test",(req,res)=>{
     res.status(200).json({
@@ -30,10 +38,10 @@ app.use((req,res,next)=>{
 
 // handling server error
 app.use((err,req,res,next)=>{
-	return res.status(err.status || 500).json({
-		success : false,
-		message : err.message
-	})
+    return errorResponse(res,{
+        statusCode : err.status,
+        message : err.message
+    })
 })
 
 module.exports = app
