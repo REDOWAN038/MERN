@@ -24,12 +24,6 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:[true,"Password is required"],
         set:(v) => bcrypt.hashSync(v,bcrypt.genSaltSync(10)),
-        validate: {
-        validator: function (v) {
-          return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(v)
-        },
-        message: "Password must be at least 8 characters, contain a lowercase letter, an uppercase letter, a number, and a special character.",
-      },
     },
     image:{
         type:String,
@@ -41,6 +35,7 @@ const userSchema = new mongoose.Schema({
     phone:{
         type:String,
         required:[true,"Phone is required"],
+        unique:true,
         validate: {
         validator: function (v) {
           return /^01\d{9}$/.test(v)
