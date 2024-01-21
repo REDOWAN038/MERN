@@ -1,4 +1,5 @@
 const createError = require("http-errors")
+const fs = require("fs")
 const userModel = require("../models/userModel")
 const { successResponse } = require("../handler/responseHandler")
 const { default: mongoose } = require("mongoose")
@@ -88,7 +89,48 @@ const getSingleUser = async (req,res,next)=>{
     }
 }
 
+// delete a user
+const deleteUser = async(req,res,next)=>{
+    try {
+        const id = req.params.id
+        const deletedUser = await userModel.findByIdAndDelete(id,{
+            isAdmin:false
+        })
+
+        if(!deletedUser){
+            throw createError(404, "user not found")
+        }
+
+        const userImagePath = deletedUser.image.toString()
+        fs.access(userImagePath,(err)=>{
+            if(err){
+                console.error("user image does not exist")
+            }else{
+                fs.unlink(userImagePath,(err)=>{
+                    if(err){
+                        throw err
+                    }
+                    console.log("user image deleted successfully");
+                })
+            }
+        })
+
+        return successResponse(res,{
+            statusCode : 200,
+            message : "user deleted successfully"
+        })
+
+    } catch (error) {
+        if(error instanceof mongoose.Error){
+            next(createError(400, "Invalid user id"))
+            return
+        }
+        next(error)
+    }
+}
+
 module.exports = {
     getUsers,
-    getSingleUser
+    getSingleUser,
+    deleteUser
 }

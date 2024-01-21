@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcrypt")
+const { defaultUserImagePath } = require("../src/secret")
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -27,6 +28,7 @@ const userSchema = new mongoose.Schema({
     },
     image:{
         type:String,
+        default:defaultUserImagePath
     },
     address:{
         type:String,
