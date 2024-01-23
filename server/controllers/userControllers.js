@@ -3,6 +3,7 @@ const fs = require("fs")
 const userModel = require("../models/userModel")
 const { successResponse } = require("../handler/responseHandler")
 const { default: mongoose } = require("mongoose")
+const deleteImage = require("../handler/deleteImage")
 // get all users
 const getUsers = async (req,res,next)=>{
     try {
@@ -101,19 +102,8 @@ const deleteUser = async(req,res,next)=>{
             throw createError(404, "user not found")
         }
 
-        const userImagePath = deletedUser.image.toString()
-        fs.access(userImagePath,(err)=>{
-            if(err){
-                console.error("user image does not exist")
-            }else{
-                fs.unlink(userImagePath,(err)=>{
-                    if(err){
-                        throw err
-                    }
-                    console.log("user image deleted successfully");
-                })
-            }
-        })
+        const userImagePath = deletedUser.image
+        deleteImage(userImagePath)
 
         return successResponse(res,{
             statusCode : 200,
