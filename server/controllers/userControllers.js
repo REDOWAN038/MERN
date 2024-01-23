@@ -4,6 +4,39 @@ const userModel = require("../models/userModel")
 const { successResponse } = require("../handler/responseHandler")
 const { default: mongoose } = require("mongoose")
 const deleteImage = require("../handler/deleteImage")
+const { createJWT } = require("../handler/jwt")
+const { jwtActivationKey } = require("../src/secret")
+
+// register a user
+const registerUser = async(req,res,next)=>{
+    try {
+        const {name, email, password, address, phone} = req.body
+
+        const existingUser = await userModel.findOne({
+            $or: [
+            { email },
+            { phone }
+            ]
+        })
+
+        if(existingUser){
+            throw createError(409, "user already exists by this mail or phone")
+        }
+
+        const newUser = {name, email, password, address, phone}
+
+        const token = createJWT(newUser, jwtActivationKey, "10m")
+
+        return successResponse(res,{
+            statusCode : 200,
+            message : "user registered successfully",
+            payload : {token}
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 // get all users
 const getUsers = async (req,res,next)=>{
     try {
@@ -122,5 +155,6 @@ const deleteUser = async(req,res,next)=>{
 module.exports = {
     getUsers,
     getSingleUser,
-    deleteUser
+    deleteUser,
+    registerUser
 }
