@@ -5,12 +5,22 @@ const { successResponse } = require("../handler/responseHandler")
 const { default: mongoose } = require("mongoose")
 const deleteImage = require("../handler/deleteImage")
 const { createJWT } = require("../handler/jwt")
-const { jwtActivationKey } = require("../src/secret")
+const { jwtActivationKey, clientURL } = require("../src/secret")
+const { sendingMail } = require("../handler/email")
 
 // register a user
 const registerUser = async(req,res,next)=>{
     try {
         const {name, email, password, address, phone} = req.body
+
+        //validations
+
+        if(!name || !email || !password || !phone || !address){
+            return successResponse(res,{
+                statusCode : 206,
+                message : "provide all required information"
+            })
+        }
 
         const existingUser = await userModel.findOne({
             $or: [
@@ -27,9 +37,27 @@ const registerUser = async(req,res,next)=>{
 
         const token = createJWT(newUser, jwtActivationKey, "10m")
 
+        const emailData = {
+            email,
+            subject : "Activate Your Account",
+            html : `
+            <h2> Hello ${name} </h2>
+            <p> please click here to <a href="${clientURL}/api/v1/users/activate/${token}" target="_blank"> activate your account </a> </p>
+            `
+        }
+
+        try {
+            await sendingMail(emailData)
+
+        } catch (error) {
+            createError(500, "failed to send activation email")
+            next()
+            return
+        }
+
         return successResponse(res,{
             statusCode : 200,
-            message : "user registered successfully",
+            message : "please check your email",
             payload : {token}
         })
     } catch (error) {
