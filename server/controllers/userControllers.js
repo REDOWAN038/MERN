@@ -1,4 +1,5 @@
 const createError = require("http-errors")
+const jwt = require("jsonwebtoken")
 const fs = require("fs")
 const userModel = require("../models/userModel")
 const { successResponse } = require("../handler/responseHandler")
@@ -62,6 +63,40 @@ const registerUser = async(req,res,next)=>{
         })
     } catch (error) {
         next(error)
+    }
+}
+
+// activate user
+const activateUserAccount = async (req,res,next)=>{
+    try {
+        const token = req.body.token
+
+        if(!token){
+            throw createError(404, "token is not found")
+        }
+
+        const decoded = jwt.verify(token, jwtActivationKey)
+        const existingUser = await userModel.findOne({
+            email : decoded.email
+        })
+
+        if(existingUser){
+            throw createError(409, "user already exists by this mail")
+        }
+        const user = await userModel.create(decoded)
+
+        return successResponse(res,{
+            statusCode : 201,
+            message : "user registered successfully"
+        })
+    } catch (error) {
+        if(error.name==="TokenExpiredError"){
+            next(createError(401, "Token has expired"))
+        }else if(error.name==="JsonWebTokenError"){
+            next(createError(401, "Inavlid Token"))
+        }else{
+            next(error)
+        }
     }
 }
 
@@ -184,5 +219,6 @@ module.exports = {
     getUsers,
     getSingleUser,
     deleteUser,
-    registerUser
+    registerUser,
+    activateUserAccount
 }
