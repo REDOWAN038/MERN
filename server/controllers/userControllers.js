@@ -13,6 +13,7 @@ const { sendingMail } = require("../handler/email")
 const registerUser = async(req,res,next)=>{
     try {
         const {name, email, password, address, phone} = req.body
+        const imageBufferString = req.file.buffer.toString("base64")
 
         const existingUser = await userModel.findOne({
             $or: [
@@ -25,7 +26,7 @@ const registerUser = async(req,res,next)=>{
             throw createError(409, "user already exists by this mail or phone")
         }
 
-        const newUser = {name, email, password, address, phone}
+        const newUser = {name, email, password, address, phone, image:imageBufferString}
 
         const token = createJWT(newUser, jwtActivationKey, "10m")
 

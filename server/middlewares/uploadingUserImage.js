@@ -1,25 +1,17 @@
 const multer = require("multer")
-const path = require("path")
-const createError = require("http-errors")
-const { uploadUserImagePath, allowedImageTypes, uploadUserImageMaxSize } = require("../config/userImage")
+// const path = require("path")
+// const createError = require("http-errors")
+const { allowedImageTypes, uploadUserImageMaxSize } = require("../config/userImage")
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadUserImagePath)
-  },
-  filename: function (req, file, cb) {
-    const extension = path.extname(file.originalname)
-    cb(null, Date.now() + "-" + file.originalname)
-    // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    // cb(null, file.fieldname + '-' + uniqueSuffix)
-  }
-})
+const storage = multer.memoryStorage()
 
 const fileFilter = (req,file,cb)=>{
-    const extension = path.extname(file.originalname)
+    if(!file.mimetype.startsWith("image/")){
+        return cb(new Error("only image file is required"), false)
+    }
 
-    if(!allowedImageTypes.includes(extension.substring(1))){
-        return cb(new Error("image file type is not allowed"), false)
+    if(!allowedImageTypes.includes(file.mimetype)){
+        return cb(new Error("image type is not allowed"), false)
     }
 
     cb(null, true)

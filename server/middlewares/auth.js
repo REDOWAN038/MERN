@@ -34,8 +34,13 @@ const validateUserRegistration = [
     .withMessage("Invalid phone number format. Must be 11 digits starting with 01."),
 
     body("image")
-    .optional()
-    .isString()
+    .custom((value, {req}) => {
+        if(!req.file || !req.file.buffer){
+            throw new Error("user image is required")
+        }
+        return true
+    })
+    .withMessage("user image is required")
 ]
 
 module.exports = {

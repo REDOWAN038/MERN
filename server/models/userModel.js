@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs")
-const { defaultUserImagePath } = require("../src/secret")
+// const { defaultUserImagePath } = require("../src/secret")
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -27,8 +27,9 @@ const userSchema = new mongoose.Schema({
         set:(v) => bcrypt.hashSync(v,bcrypt.genSaltSync(10)),
     },
     image:{
-        type:String,
-        default:defaultUserImagePath
+        type:Buffer,
+        contentType:String,
+        required:[true,"User image is required"],
     },
     address:{
         type:String,
