@@ -14,15 +14,6 @@ const registerUser = async(req,res,next)=>{
     try {
         const {name, email, password, address, phone} = req.body
 
-        //validations
-
-        if(!name || !email || !password || !phone || !address){
-            return successResponse(res,{
-                statusCode : 206,
-                message : "provide all required information"
-            })
-        }
-
         const existingUser = await userModel.findOne({
             $or: [
             { email },

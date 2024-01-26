@@ -14,12 +14,12 @@ const userSchema = new mongoose.Schema({
       unique: true,
       trim: true,
       lowercase:true,
-      validate: {
-        validator: function (v) {
-          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-        },
-        message: "Invalid email address.",
-      },
+      // validate: {
+      //   validator: function (v) {
+      //     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+      //   },
+      //   message: "Invalid email address.",
+      // },
     },
     password:{
         type:String,
@@ -38,12 +38,12 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:[true,"Phone is required"],
         unique:true,
-        validate: {
-        validator: function (v) {
-          return /^01\d{9}$/.test(v)
-        },
-        message: "Must be 11 digits starting with 01.",
-      },
+      //   validate: {
+      //   validator: function (v) {
+      //     return /^01\d{9}$/.test(v)
+      //   },
+      //   message: "Must be 11 digits starting with 01.",
+      // },
     },
     isAdmin:{
         type:Boolean,
