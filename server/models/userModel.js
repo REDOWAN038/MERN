@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs")
-// const { defaultUserImagePath } = require("../src/secret")
+const { defaultUserImagePath } = require("../src/secret")
 
 const userSchema = new mongoose.Schema({
     name:{
@@ -14,12 +14,6 @@ const userSchema = new mongoose.Schema({
       unique: true,
       trim: true,
       lowercase:true,
-      // validate: {
-      //   validator: function (v) {
-      //     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
-      //   },
-      //   message: "Invalid email address.",
-      // },
     },
     password:{
         type:String,
@@ -27,9 +21,8 @@ const userSchema = new mongoose.Schema({
         set:(v) => bcrypt.hashSync(v,bcrypt.genSaltSync(10)),
     },
     image:{
-        type:Buffer,
-        contentType:String,
-        required:[true,"User image is required"],
+        type:String,
+        default:defaultUserImagePath
     },
     address:{
         type:String,
@@ -39,12 +32,6 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:[true,"Phone is required"],
         unique:true,
-      //   validate: {
-      //   validator: function (v) {
-      //     return /^01\d{9}$/.test(v)
-      //   },
-      //   message: "Must be 11 digits starting with 01.",
-      // },
     },
     isAdmin:{
         type:Boolean,

@@ -8,12 +8,13 @@ const deleteImage = require("../handler/deleteImage")
 const { createJWT } = require("../handler/jwt")
 const { jwtActivationKey, clientURL } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
+const cloudinary = require("../config/cloudinary")
 
 // register a user
 const registerUser = async(req,res,next)=>{
     try {
         const {name, email, password, address, phone} = req.body
-        const imageBufferString = req.file.buffer.toString("base64")
+        const image = req.file?.path
 
         const existingUser = await userModel.findOne({
             $or: [
@@ -26,7 +27,7 @@ const registerUser = async(req,res,next)=>{
             throw createError(409, "user already exists by this mail or phone")
         }
 
-        const newUser = {name, email, password, address, phone, image:imageBufferString}
+        const newUser = {name, email, password, address, phone, image}
 
         const token = createJWT(newUser, jwtActivationKey, "10m")
 
@@ -75,6 +76,16 @@ const activateUserAccount = async (req,res,next)=>{
         if(existingUser){
             throw createError(409, "user already exists by this mail")
         }
+
+        const image = decoded.image
+
+        if(image){
+            const response = await cloudinary.uploader.upload(image,{
+                folder : "MERN/users"
+            })
+            decoded.image = response.secure_url
+        }
+
         const user = await userModel.create(decoded)
 
         return successResponse(res,{
