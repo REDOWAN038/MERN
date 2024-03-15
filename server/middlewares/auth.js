@@ -1,44 +1,58 @@
-const {body} = require("express-validator")
+const createError = require("http-errors")
+const jwt = require("jsonwebtoken")
+const { jwtAccessKey } = require("../src/secret")
 
-// validate user registration input
-const validateUserRegistration = [
-    body("name")
-    .trim()
-    .notEmpty()
-    .withMessage("Name is required"),
+const isLoggedIn = async (req, res, next) => {
+    try {
+        const accessToken = req.cookies.accessToken
+        if (!accessToken) {
+            throw createError(401, "user is not logged in")
+        }
 
-    body("email")
-    .trim()
-    .notEmpty()
-    .withMessage("Email is required")
-    .isEmail()
-    .withMessage("Emails is not valid"),
+        const decoded = jwt.verify(accessToken, jwtAccessKey)
+        if (!decoded) {
+            throw createError(401, "invalid token")
+        }
 
-    body("password")
-    .trim()
-    .notEmpty()
-    .withMessage("Pasword is required")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
-    .withMessage("Password must be at least 8 characters, contain a lowercase letter, an uppercase letter, a number, and a special character"),
+        req.user = decoded.user
+        next()
+    } catch (error) {
+        return next(error)
+    }
+}
 
-    body("address")
-    .trim()
-    .notEmpty()
-    .withMessage("Address is required"),
+const isLoggedOut = async (req, res, next) => {
+    try {
+        const accessToken = req.cookies.accessToken
+        if (accessToken) {
+            try {
+                const decoded = jwt.verify(accessToken, jwtAccessKey)
+                if (decoded) {
+                    throw createError(400, "user already logged in")
+                }
+            } catch (error) {
+                throw error
+            }
+        }
+        next()
+    } catch (error) {
+        return next(error)
+    }
+}
 
-    body("phone")
-    .trim()
-    .notEmpty()
-    .withMessage("Phone is required")
-    .matches(/^01\d{9}$/)
-    .withMessage("Invalid phone number format. Must be 11 digits starting with 01."),
-
-    body("image")
-    .optional()
-    .isString()
-    .withMessage("user image is optional")    
-]
+const isAdmin = async (req, res, next) => {
+    try {
+        if (!req.user.isAdmin) {
+            throw createError(403, "Forbidden")
+        }
+        next()
+    } catch (error) {
+        return next(error)
+    }
+}
 
 module.exports = {
-    validateUserRegistration
+    isLoggedIn,
+    isLoggedOut,
+    isAdmin
 }
