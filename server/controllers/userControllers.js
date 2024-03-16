@@ -9,6 +9,7 @@ const { jwtActivationKey, clientURL } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
 const cloudinary = require("../config/cloudinary")
 const { getPublicId } = require("../handler/cloudinary")
+const { handleBanUserAction, handleUnBanUserAction } = require("../services/userService")
 
 // register a user
 const registerUser = async (req, res, next) => {
@@ -297,25 +298,7 @@ const handleUpdateUser = async (req, res, next) => {
 const handleBanUser = async (req, res, next) => {
     try {
         const userId = req.params.id
-        const user = await userModel.findById(userId)
-
-        if (!user) {
-            throw createError(404, "user with this id does not exist.")
-        }
-
-        if (user.isBanned) {
-            throw Error("user already banned")
-        }
-
-        const options = { new: true, runValidators: true, context: 'query' }
-        const updates = { isBanned: true }
-
-        const bannedUser = await userModel.findByIdAndUpdate(
-            userId,
-            updates,
-            options
-        ).select("-password")
-
+        handleBanUserAction(userId)
         return successResponse(res, {
             statusCode: 200,
             message: "user banned successfully",
@@ -333,25 +316,7 @@ const handleBanUser = async (req, res, next) => {
 const handleUnBanUser = async (req, res, next) => {
     try {
         const userId = req.params.id
-        const user = await userModel.findById(userId)
-
-        if (!user) {
-            throw createError(404, "user with this id does not exist.")
-        }
-
-        if (!user.isBanned) {
-            throw Error("user already unbanned")
-        }
-
-        const options = { new: true, runValidators: true, context: 'query' }
-        const updates = { isBanned: false }
-
-        const unBannedUser = await userModel.findByIdAndUpdate(
-            userId,
-            updates,
-            options
-        ).select("-password")
-
+        handleUnBanUserAction(userId)
         return successResponse(res, {
             statusCode: 200,
             message: "user unbanned successfully",
