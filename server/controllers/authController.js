@@ -34,11 +34,13 @@ const handleLogin = async (req, res, next) => {
             httpOnly: true,
         })
 
+        const userWithOutPassword = await userModel.findOne({ email }).select("-password")
+
         return successResponse(res, {
             statusCode: 200,
             message: `welcome back, ${user.name}`,
             payload: {
-                user
+                userWithOutPassword
             }
         })
     } catch (error) {
