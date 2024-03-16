@@ -225,7 +225,7 @@ const deleteUser = async (req, res, next) => {
 }
 
 // updating a user
-const updateUser = async (req, res, next) => {
+const handleUpdateUser = async (req, res, next) => {
     try {
         const userId = req.params.id
         const user = await userModel.findById(userId)
@@ -293,11 +293,85 @@ const updateUser = async (req, res, next) => {
     }
 }
 
+// ban user
+const handleBanUser = async (req, res, next) => {
+    try {
+        const userId = req.params.id
+        const user = await userModel.findById(userId)
+
+        if (!user) {
+            throw createError(404, "user with this id does not exist.")
+        }
+
+        if (user.isBanned) {
+            throw Error("user already banned")
+        }
+
+        const options = { new: true, runValidators: true, context: 'query' }
+        const updates = { isBanned: true }
+
+        const bannedUser = await userModel.findByIdAndUpdate(
+            userId,
+            updates,
+            options
+        ).select("-password")
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "user banned successfully",
+        })
+    } catch (error) {
+        if (error instanceof mongoose.Error) {
+            next(createError(400, "Invalid user id"))
+            return
+        }
+        next(error)
+    }
+}
+
+// unban user
+const handleUnBanUser = async (req, res, next) => {
+    try {
+        const userId = req.params.id
+        const user = await userModel.findById(userId)
+
+        if (!user) {
+            throw createError(404, "user with this id does not exist.")
+        }
+
+        if (!user.isBanned) {
+            throw Error("user already unbanned")
+        }
+
+        const options = { new: true, runValidators: true, context: 'query' }
+        const updates = { isBanned: false }
+
+        const unBannedUser = await userModel.findByIdAndUpdate(
+            userId,
+            updates,
+            options
+        ).select("-password")
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "user unbanned successfully",
+        })
+    } catch (error) {
+        if (error instanceof mongoose.Error) {
+            next(createError(400, "Invalid user id"))
+            return
+        }
+        next(error)
+    }
+}
+
 module.exports = {
     getUsers,
     getSingleUser,
     deleteUser,
     registerUser,
     activateUserAccount,
-    updateUser
+    handleUpdateUser,
+    handleBanUser,
+    handleUnBanUser
 }

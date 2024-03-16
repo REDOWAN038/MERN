@@ -1,5 +1,5 @@
 const express = require("express")
-const { getUsers, getSingleUser, deleteUser, registerUser, activateUserAccount, updateUser } = require("../controllers/userControllers")
+const { getUsers, getSingleUser, deleteUser, registerUser, activateUserAccount, handleUpdateUser, handleBanUser, handleUnBanUser } = require("../controllers/userControllers")
 const { validateUserRegistration } = require("../middlewares/validation")
 const { runValidation } = require("../middlewares")
 const { uploadUserImage } = require("../middlewares/uploadingUserImage")
@@ -22,6 +22,12 @@ router.get("/:id", isLoggedIn, getSingleUser)
 router.delete("/:id", isLoggedIn, deleteUser)
 
 // update user
-router.put("/:id", uploadUserImage.single("image"), isLoggedIn, updateUser)
+router.put("/:id", uploadUserImage.single("image"), isLoggedIn, handleUpdateUser)
+
+// ban user
+router.put("/ban-user/:id", isLoggedIn, isAdmin, handleBanUser)
+
+// unban user
+router.put("/unban-user/:id", isLoggedIn, isAdmin, handleUnBanUser)
 
 module.exports = router

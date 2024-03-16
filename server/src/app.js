@@ -12,7 +12,7 @@ const { errorResponse } = require("../handler/responseHandler")
 
 const limiter = rateLimit({
     windowMs: 1 * 60 * 1000,
-    max: 5,
+    max: 20,
     message: "too many requests"
 })
 
