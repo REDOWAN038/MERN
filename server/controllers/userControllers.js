@@ -7,9 +7,7 @@ const { default: mongoose } = require("mongoose")
 const { createJWT } = require("../handler/jwt")
 const { jwtActivationKey, clientURL } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
-const cloudinary = require("../config/cloudinary")
-const { getPublicId } = require("../handler/cloudinary")
-const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser } = require("../services/userService")
+const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser, deleteUserAction, updateUserAction } = require("../services/userService")
 
 // register a user
 const registerUser = async (req, res, next) => {
@@ -148,26 +146,10 @@ const getSingleUser = async (req, res, next) => {
 }
 
 // delete a user
-const deleteUser = async (req, res, next) => {
+const handleDeleteUser = async (req, res, next) => {
     try {
         const userId = req.params.id
-        const user = await userModel.findById(userId)
-
-        if (!user) {
-            throw createError(404, "user not found")
-        }
-
-        const userImagePath = user.image
-        const publicId = await getPublicId(userImagePath)
-
-        const { result } = await cloudinary.uploader.destroy(`MERN/users/${publicId}`)
-
-        if (result !== "ok") {
-            throw createError(400, "please try again")
-        }
-
-        await userModel.findByIdAndDelete(userId)
-
+        await deleteUserAction(userId)
         return successResponse(res, {
             statusCode: 200,
             message: "user deleted successfully"
@@ -186,54 +168,7 @@ const deleteUser = async (req, res, next) => {
 const handleUpdateUser = async (req, res, next) => {
     try {
         const userId = req.params.id
-        const user = await userModel.findById(userId)
-        if (!user) {
-            throw createError(404, "user not found")
-        }
-        const updateOptions = { new: true, runValidators: true, context: 'query' }
-        let updates = {}
-
-        for (let key in req.body) {
-            if (['name', 'password', 'address'].includes(key)) {
-                updates[key] = req.body[key]
-            } else if (['email'].includes(key)) {
-                throw new Error("email can not be updated")
-            } else if (['phone'].includes(key)) {
-                const phone = req.body[key]
-                const temp = await userModel.findOne({ phone })
-                if (temp) {
-                    throw new Error("this phone number is aleady used")
-                }
-            }
-        }
-
-        const image = req.file?.path
-
-        if (image) {
-            const response = await cloudinary.uploader.upload(image, {
-                folder: "MERN/users"
-            })
-            updates.image = response.secure_url
-
-            const publicId = await getPublicId(user.image)
-
-            const { result } = await cloudinary.uploader.destroy(`MERN/users/${publicId}`)
-
-            if (result !== "ok") {
-                throw createError(400, "please try again")
-            }
-        }
-
-        const updatedUser = await userModel.findByIdAndUpdate(
-            userId,
-            updates,
-            updateOptions
-        ).select("-password")
-
-        if (!updatedUser) {
-            throw createError(404, "user with this id does not exist.")
-        }
-
+        const updatedUser = await updateUserAction(userId, req)
         return successResponse(res, {
             statusCode: 200,
             message: 'user updated successfully',
@@ -290,7 +225,7 @@ const handleUnBanUser = async (req, res, next) => {
 module.exports = {
     getUsers,
     getSingleUser,
-    deleteUser,
+    handleDeleteUser,
     registerUser,
     activateUserAccount,
     handleUpdateUser,

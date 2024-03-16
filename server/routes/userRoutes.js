@@ -1,5 +1,5 @@
 const express = require("express")
-const { getUsers, getSingleUser, deleteUser, registerUser, activateUserAccount, handleUpdateUser, handleBanUser, handleUnBanUser } = require("../controllers/userControllers")
+const { getUsers, getSingleUser, registerUser, activateUserAccount, handleUpdateUser, handleBanUser, handleUnBanUser, handleDeleteUser } = require("../controllers/userControllers")
 const { validateUserRegistration } = require("../middlewares/validation")
 const { runValidation } = require("../middlewares")
 const { uploadUserImage } = require("../middlewares/uploadingUserImage")
@@ -19,7 +19,7 @@ router.get("/", isLoggedIn, isAdmin, getUsers)
 router.get("/:id", isLoggedIn, getSingleUser)
 
 // delete user
-router.delete("/:id", isLoggedIn, deleteUser)
+router.delete("/:id", isLoggedIn, handleDeleteUser)
 
 // update user
 router.put("/:id", uploadUserImage.single("image"), isLoggedIn, handleUpdateUser)
