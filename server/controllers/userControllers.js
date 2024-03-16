@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken")
 const fs = require("fs")
 const userModel = require("../models/userModel")
 const { successResponse } = require("../handler/responseHandler")
-const { default: mongoose } = require("mongoose")
 const { createJWT } = require("../handler/jwt")
 const { jwtActivationKey, clientURL } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
@@ -137,10 +136,6 @@ const getSingleUser = async (req, res, next) => {
             }
         })
     } catch (error) {
-        if (error instanceof mongoose.Error) {
-            next(createError(400, "Invalid user id"))
-            return
-        }
         next(error)
     }
 }
@@ -156,10 +151,6 @@ const handleDeleteUser = async (req, res, next) => {
         })
 
     } catch (error) {
-        if (error instanceof mongoose.Error) {
-            next(createError(400, "Invalid user id"))
-            return
-        }
         next(error)
     }
 }
@@ -178,10 +169,6 @@ const handleUpdateUser = async (req, res, next) => {
         })
 
     } catch (error) {
-        if (error instanceof mongoose.Error) {
-            next(createError(400, "Invalid user id"))
-            return
-        }
         next(error)
     }
 }
@@ -196,10 +183,6 @@ const handleBanUser = async (req, res, next) => {
             message: "user banned successfully",
         })
     } catch (error) {
-        if (error instanceof mongoose.Error) {
-            next(createError(400, "Invalid user id"))
-            return
-        }
         next(error)
     }
 }
@@ -214,10 +197,6 @@ const handleUnBanUser = async (req, res, next) => {
             message: "user unbanned successfully",
         })
     } catch (error) {
-        if (error instanceof mongoose.Error) {
-            next(createError(400, "Invalid user id"))
-            return
-        }
         next(error)
     }
 }

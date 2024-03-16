@@ -1,4 +1,6 @@
 const createError = require("http-errors")
+const mongoose = require("mongoose")
+
 const userModel = require("../models/userModel")
 const cloudinary = require("../config/cloudinary")
 const { getPublicId } = require("../handler/cloudinary")
@@ -54,6 +56,9 @@ const findSingleUser = async (userId) => {
 
         return user
     } catch (error) {
+        if (error instanceof mongoose.Error.CastError) {
+            throw createError(400, "Invalid User id")
+        }
         throw (error)
     }
 }
@@ -78,6 +83,9 @@ const deleteUserAction = async (userId) => {
 
         await userModel.findByIdAndDelete(userId)
     } catch (error) {
+        if (error instanceof mongoose.Error.CastError) {
+            throw createError(400, "Invalid User id")
+        }
         throw error
     }
 }
@@ -135,6 +143,9 @@ const updateUserAction = async (userId, req) => {
 
         return updatedUser
     } catch (error) {
+        if (error instanceof mongoose.Error.CastError) {
+            throw createError(400, "Invalid User id")
+        }
         throw error
     }
 }
@@ -161,6 +172,9 @@ const handleBanUserAction = async (userId) => {
             options
         ).select("-password")
     } catch (error) {
+        if (error instanceof mongoose.Error.CastError) {
+            throw createError(400, "Invalid User id")
+        }
         throw (error)
     }
 }
@@ -187,6 +201,9 @@ const handleUnBanUserAction = async (userId) => {
             options
         ).select("-password")
     } catch (error) {
+        if (error instanceof mongoose.Error.CastError) {
+            throw createError(400, "Invalid User id")
+        }
         throw (error)
     }
 }
