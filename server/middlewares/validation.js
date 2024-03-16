@@ -54,7 +54,26 @@ const validateUserLogin = [
         .withMessage("Pasword is required")
 ]
 
+// validate update password input
+const validateUpdatePasswordLogin = [
+    body("newPassword")
+        .trim()
+        .notEmpty()
+        .withMessage("new password is required")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+        .withMessage("Password must be at least 8 characters, contain a lowercase letter, an uppercase letter, a number, and a special character"),
+
+    body("confirmNewPassword")
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error("passwords did not match")
+            }
+            return true
+        })
+]
+
 module.exports = {
     validateUserRegistration,
-    validateUserLogin
+    validateUserLogin,
+    validateUpdatePasswordLogin
 }

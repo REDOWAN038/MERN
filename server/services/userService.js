@@ -208,11 +208,36 @@ const handleUnBanUserAction = async (userId) => {
     }
 }
 
+// update password
+const updatePasswordAction = async (userId, newPassword) => {
+    try {
+        const user = await userModel.findById(userId)
+
+        if (!user) {
+            throw createError(404, "user is not found")
+        }
+
+        const updates = { password: newPassword }
+        const updateOptions = { new: true, runValidators: true, context: 'query' }
+
+        const updatedUser = await userModel.findByIdAndUpdate(userId, updates, updateOptions).select("-password")
+
+        if (!updatedUser) {
+            throw createError(400, "password is not updated... try again!!!")
+        }
+
+        return updatedUser
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
     handleBanUserAction,
     handleUnBanUserAction,
     findAllUsers,
     findSingleUser,
     deleteUserAction,
-    updateUserAction
+    updateUserAction,
+    updatePasswordAction
 }

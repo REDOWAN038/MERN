@@ -6,7 +6,7 @@ const { successResponse } = require("../handler/responseHandler")
 const { createJWT } = require("../handler/jwt")
 const { jwtActivationKey, clientURL } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
-const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser, deleteUserAction, updateUserAction } = require("../services/userService")
+const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser, deleteUserAction, updateUserAction, updatePasswordAction } = require("../services/userService")
 
 // register a user
 const registerUser = async (req, res, next) => {
@@ -201,6 +201,24 @@ const handleUnBanUser = async (req, res, next) => {
     }
 }
 
+// update password
+const handleUpdatePassword = async (req, res, next) => {
+    try {
+        const { newPassword } = req.body
+        const userId = req.user._id
+        const updatedUser = await updatePasswordAction(userId, newPassword)
+        return successResponse(res, {
+            statusCode: 200,
+            message: "password updated successfully",
+            payload: {
+                updatedUser
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     getUsers,
     getSingleUser,
@@ -209,5 +227,6 @@ module.exports = {
     activateUserAccount,
     handleUpdateUser,
     handleBanUser,
-    handleUnBanUser
+    handleUnBanUser,
+    handleUpdatePassword
 }
