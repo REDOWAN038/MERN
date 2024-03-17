@@ -7,7 +7,6 @@ const cloudinary = require("../config/cloudinary")
 const { getPublicId } = require("../handler/cloudinary")
 const { createJWT } = require("../handler/jwt")
 const { jwtResetPasswordKey, clientURL, jwtActivationKey } = require("../src/secret")
-const { sendingMail } = require("../handler/email")
 
 // register user
 const userRegisterAction = async (req) => {
@@ -47,8 +46,6 @@ const userRegisterAction = async (req) => {
             next()
             return
         }
-
-        return token
     } catch (error) {
         throw error
     }
@@ -106,7 +103,7 @@ const findAllUsers = async (search, page, limit) => {
         const users = await userModel.find(filter, options).limit(limit).skip((page - 1) * limit)
         const totalUsers = await userModel.find(filter).countDocuments()
 
-        if (!users) {
+        if (!users || users.length === 0) {
             throw createError(404, "users not found")
         }
 
@@ -179,9 +176,10 @@ const updateUserAction = async (userId, req) => {
         }
         const updateOptions = { new: true, runValidators: true, context: 'query' }
         let updates = {}
+        const allowedFields = ['name', 'password', 'address']
 
         for (let key in req.body) {
-            if (['name', 'password', 'address'].includes(key)) {
+            if (allowedFields.includes(key)) {
                 updates[key] = req.body[key]
             } else if (['email'].includes(key)) {
                 throw new Error("email can not be updated")
@@ -339,8 +337,6 @@ const forgetPasswordAction = async (email) => {
             next()
             return
         }
-
-        return token
     } catch (error) {
         throw error
     }

@@ -1,21 +1,16 @@
 const createError = require("http-errors")
-const jwt = require("jsonwebtoken")
 const fs = require("fs")
-const userModel = require("../models/userModel")
+
 const { successResponse } = require("../handler/responseHandler")
-const { createJWT } = require("../handler/jwt")
-const { jwtActivationKey, clientURL, jwtResetPasswordKey } = require("../src/secret")
-const { sendingMail } = require("../handler/email")
 const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser, deleteUserAction, updateUserAction, updatePasswordAction, forgetPasswordAction, resetPasswordAction, userRegisterAction, userActivateAction } = require("../services/userService")
 
 // register a user
 const registerUser = async (req, res, next) => {
     try {
-        const token = await userRegisterAction(req)
+        await userRegisterAction(req)
         return successResponse(res, {
             statusCode: 200,
             message: "please check your email",
-            payload: { token }
         })
     } catch (error) {
         next(error)
@@ -164,11 +159,10 @@ const handleUpdatePassword = async (req, res, next) => {
 const handleForgetPassword = async (req, res, next) => {
     try {
         const { email } = req.body
-        const token = await forgetPasswordAction(email)
+        await forgetPasswordAction(email)
         return successResponse(res, {
             statusCode: 200,
             message: "please check your email",
-            payload: { token }
         })
     } catch (error) {
         next(error)

@@ -1,6 +1,7 @@
 const createError = require("http-errors")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcryptjs")
+
 const userModel = require("../models/userModel")
 const { successResponse } = require("../handler/responseHandler")
 const { createJWT } = require("../handler/jwt")
@@ -43,7 +44,8 @@ const handleLogin = async (req, res, next) => {
             sameSite: 'none',
         })
 
-        const userWithOutPassword = await userModel.findOne({ email }).select("-password")
+        const userWithOutPassword = user.toObject()
+        delete userWithOutPassword.password
 
         return successResponse(res, {
             statusCode: 200,
