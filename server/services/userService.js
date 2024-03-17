@@ -1,9 +1,13 @@
 const createError = require("http-errors")
 const mongoose = require("mongoose")
+const jwt = require("jsonwebtoken")
 
 const userModel = require("../models/userModel")
 const cloudinary = require("../config/cloudinary")
 const { getPublicId } = require("../handler/cloudinary")
+const { createJWT } = require("../handler/jwt")
+const { jwtResetPasswordKey, clientURL } = require("../src/secret")
+const { sendingMail } = require("../handler/email")
 
 // find all users
 const findAllUsers = async (search, page, limit) => {
@@ -232,6 +236,74 @@ const updatePasswordAction = async (userId, newPassword) => {
     }
 }
 
+// forget password
+const forgetPasswordAction = async (email) => {
+    try {
+        const user = await userModel.findOne({ email })
+        if (!user) {
+            throw createError(404, "user does not exist")
+        }
+
+        const token = createJWT({ email }, jwtResetPasswordKey, "10m")
+
+        const emailData = {
+            email,
+            subject: "Reset Your Password",
+            html: `
+            <h2> Hello ${user.name} </h2>
+            <p> please click here to <a href="${clientURL}/api/v1/users/reset-password/${token}" target="_blank"> reset your account password </a> </p>
+            `
+        }
+
+        try {
+            // await sendingMail(emailData)
+
+        } catch (error) {
+            createError(500, "failed to send reset password email")
+            next()
+            return
+        }
+
+        return token
+    } catch (error) {
+        throw error
+    }
+}
+
+// reset password
+const resetPasswordAction = async (token, newPassword) => {
+    try {
+        const decoded = jwt.verify(token, jwtResetPasswordKey)
+        if (!decoded) {
+            throw createError(400, "Invalid or Expired token")
+        }
+
+        const user = await userModel.findOne({
+            email: decoded.email
+        })
+
+        if (!user) {
+            throw createError(404, "user does not exists by this mail")
+        }
+
+        const filter = { email: decoded.email }
+        const updates = { password: newPassword }
+        const options = { new: true }
+
+        const updatedUser = await userModel.findOneAndUpdate(
+            filter,
+            updates,
+            options
+        ).select("-password")
+
+        if (!updatedUser) {
+            throw createError(400, "password reset failed")
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
     handleBanUserAction,
     handleUnBanUserAction,
@@ -239,5 +311,7 @@ module.exports = {
     findSingleUser,
     deleteUserAction,
     updateUserAction,
-    updatePasswordAction
+    updatePasswordAction,
+    forgetPasswordAction,
+    resetPasswordAction
 }

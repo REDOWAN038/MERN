@@ -72,8 +72,43 @@ const validateUpdatePasswordLogin = [
         })
 ]
 
+// validate user forget password input
+const validateUserForgetPassword = [
+    body("email")
+        .trim()
+        .notEmpty()
+        .withMessage("Email is required")
+        .isEmail()
+        .withMessage("Emails is not valid"),
+]
+
+// validate user reset password input
+const validateUserResetPassword = [
+    body("token")
+        .trim()
+        .notEmpty()
+        .withMessage("Token is required"),
+
+    body("newPassword")
+        .trim()
+        .notEmpty()
+        .withMessage("new password is required")
+        .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+        .withMessage("Password must be at least 8 characters, contain a lowercase letter, an uppercase letter, a number, and a special character"),
+
+    body("confirmNewPassword")
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error("passwords did not match")
+            }
+            return true
+        })
+]
+
 module.exports = {
     validateUserRegistration,
     validateUserLogin,
-    validateUpdatePasswordLogin
+    validateUpdatePasswordLogin,
+    validateUserForgetPassword,
+    validateUserResetPassword
 }

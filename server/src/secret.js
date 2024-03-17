@@ -4,6 +4,7 @@ const mongoURL = process.env.MONGO_URL || "mongodb://localhost:27017/MERN"
 const defaultUserImagePath = process.env.DEFAULT_USER_IMAGE_PATH || "public/images/users/default.png"
 const jwtActivationKey = process.env.JWT_ACTIVATION_KEY
 const jwtAccessKey = process.env.JWT_ACESS_KEY
+const jwtResetPasswordKey = process.env.JWT_RESET_PASSWORD_KEY
 const smtpUser = process.env.SMTP_USER || ""
 const smtpPassword = process.env.SMTP_PASS || ""
 const clientURL = process.env.CLIENT_URL || ""
@@ -22,5 +23,6 @@ module.exports = {
     cloudName,
     cloudApiKey,
     cloudSecretKey,
-    jwtAccessKey
+    jwtAccessKey,
+    jwtResetPasswordKey
 }
