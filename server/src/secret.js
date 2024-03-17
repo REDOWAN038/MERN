@@ -5,6 +5,7 @@ const defaultUserImagePath = process.env.DEFAULT_USER_IMAGE_PATH || "public/imag
 const jwtActivationKey = process.env.JWT_ACTIVATION_KEY
 const jwtAccessKey = process.env.JWT_ACESS_KEY
 const jwtResetPasswordKey = process.env.JWT_RESET_PASSWORD_KEY
+const jwtRefreshKey = process.env.JWT_REFRESH_KEY
 const smtpUser = process.env.SMTP_USER || ""
 const smtpPassword = process.env.SMTP_PASS || ""
 const clientURL = process.env.CLIENT_URL || ""
@@ -24,5 +25,6 @@ module.exports = {
     cloudApiKey,
     cloudSecretKey,
     jwtAccessKey,
-    jwtResetPasswordKey
+    jwtResetPasswordKey,
+    jwtRefreshKey
 }
