@@ -6,8 +6,84 @@ const userModel = require("../models/userModel")
 const cloudinary = require("../config/cloudinary")
 const { getPublicId } = require("../handler/cloudinary")
 const { createJWT } = require("../handler/jwt")
-const { jwtResetPasswordKey, clientURL } = require("../src/secret")
+const { jwtResetPasswordKey, clientURL, jwtActivationKey } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
+
+// register user
+const userRegisterAction = async (req) => {
+    try {
+        const { name, email, password, address, phone } = req.body
+        const image = req.file?.path
+
+        const existingUser = await userModel.findOne({
+            $or: [
+                { email },
+                { phone }
+            ]
+        })
+
+        if (existingUser) {
+            throw createError(409, "user already exists by this mail or phone")
+        }
+
+        const newUser = { name, email, password, address, phone, image }
+
+        const token = createJWT(newUser, jwtActivationKey, "10m")
+
+        const emailData = {
+            email,
+            subject: "Activate Your Account",
+            html: `
+            <h2> Hello ${name} </h2>
+            <p> please click here to <a href="${clientURL}/api/v1/users/activate/${token}" target="_blank"> activate your account </a> </p>
+            `
+        }
+
+        try {
+            // await sendingMail(emailData)
+
+        } catch (error) {
+            createError(500, "failed to send activation email")
+            next()
+            return
+        }
+
+        return token
+    } catch (error) {
+        throw error
+    }
+}
+
+// activate user
+const userActivateAction = async (token) => {
+    try {
+        if (!token) {
+            throw createError(404, "token is not found")
+        }
+
+        const decoded = jwt.verify(token, jwtActivationKey)
+        const existingUser = await userModel.findOne({
+            email: decoded.email
+        })
+
+        if (existingUser) {
+            throw createError(409, "user already exists by this mail")
+        }
+
+        const image = decoded.image
+
+        if (image) {
+            const response = await cloudinary.uploader.upload(image, {
+                folder: "MERN/users"
+            })
+            decoded.image = response.secure_url
+        }
+
+        const user = await userModel.create(decoded)
+    } catch (error) {
+        throw error
+    }
+}
 
 // find all users
 const findAllUsers = async (search, page, limit) => {
@@ -313,5 +389,7 @@ module.exports = {
     updateUserAction,
     updatePasswordAction,
     forgetPasswordAction,
-    resetPasswordAction
+    resetPasswordAction,
+    userRegisterAction,
+    userActivateAction
 }

@@ -6,47 +6,12 @@ const { successResponse } = require("../handler/responseHandler")
 const { createJWT } = require("../handler/jwt")
 const { jwtActivationKey, clientURL, jwtResetPasswordKey } = require("../src/secret")
 const { sendingMail } = require("../handler/email")
-const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser, deleteUserAction, updateUserAction, updatePasswordAction, forgetPasswordAction, resetPasswordAction } = require("../services/userService")
+const { handleBanUserAction, handleUnBanUserAction, findAllUsers, findSingleUser, deleteUserAction, updateUserAction, updatePasswordAction, forgetPasswordAction, resetPasswordAction, userRegisterAction, userActivateAction } = require("../services/userService")
 
 // register a user
 const registerUser = async (req, res, next) => {
     try {
-        const { name, email, password, address, phone } = req.body
-        const image = req.file?.path
-
-        const existingUser = await userModel.findOne({
-            $or: [
-                { email },
-                { phone }
-            ]
-        })
-
-        if (existingUser) {
-            throw createError(409, "user already exists by this mail or phone")
-        }
-
-        const newUser = { name, email, password, address, phone, image }
-
-        const token = createJWT(newUser, jwtActivationKey, "10m")
-
-        const emailData = {
-            email,
-            subject: "Activate Your Account",
-            html: `
-            <h2> Hello ${name} </h2>
-            <p> please click here to <a href="${clientURL}/api/v1/users/activate/${token}" target="_blank"> activate your account </a> </p>
-            `
-        }
-
-        try {
-            // await sendingMail(emailData)
-
-        } catch (error) {
-            createError(500, "failed to send activation email")
-            next()
-            return
-        }
-
+        const token = await userRegisterAction(req)
         return successResponse(res, {
             statusCode: 200,
             message: "please check your email",
@@ -60,32 +25,8 @@ const registerUser = async (req, res, next) => {
 // activate user
 const activateUserAccount = async (req, res, next) => {
     try {
-        const token = req.body.token
-
-        if (!token) {
-            throw createError(404, "token is not found")
-        }
-
-        const decoded = jwt.verify(token, jwtActivationKey)
-        const existingUser = await userModel.findOne({
-            email: decoded.email
-        })
-
-        if (existingUser) {
-            throw createError(409, "user already exists by this mail")
-        }
-
-        const image = decoded.image
-
-        if (image) {
-            const response = await cloudinary.uploader.upload(image, {
-                folder: "MERN/users"
-            })
-            decoded.image = response.secure_url
-        }
-
-        const user = await userModel.create(decoded)
-
+        const { token } = req.body
+        await userActivateAction(token)
         return successResponse(res, {
             statusCode: 201,
             message: "user registered successfully"
