@@ -8,6 +8,8 @@ const app = express()
 const userRoutes = require("../routes/userRoutes")
 const seedRoutes = require("../routes/seedRoutes")
 const authRoutes = require("../routes/authRoutes")
+const categoryRoutes = require("../routes/categoryRoutes")
+
 const { errorResponse } = require("../handler/responseHandler")
 
 const limiter = rateLimit({
@@ -27,6 +29,7 @@ app.use(limiter)
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/seed", seedRoutes)
 app.use("/api/v1/auth", authRoutes)
+app.use("/api/v1/categories", categoryRoutes)
 
 app.get("/test", (req, res) => {
     res.status(200).json({
