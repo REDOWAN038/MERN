@@ -141,26 +141,23 @@ const validateProduct = [
         .isFloat({ min: 0 })
         .withMessage("Quantity must be a non-negative value"),
     body("sold")
+        .optional()
         .isNumeric()
         .withMessage("Sold must be a numeric value")
         .isFloat({ min: 0 })
         .withMessage("Sold must be a non-negative value"),
     body("shipping")
+        .optional()
         .isNumeric()
         .withMessage("Shipping must be a numeric value")
         .isFloat({ min: 0 })
         .withMessage("Shipping must be a non-negative value"),
-    body("image")
-        .trim()
-        .notEmpty()
-        .withMessage("product image is required"),
     body("category")
         .trim()
         .notEmpty()
         .withMessage("Category is required")
         .custom(async (value, { req }) => {
-            // Check if the category exists in the database
-            const category = await categoryModel.findOne({ name: value });
+            const category = await categoryModel.findById(value)
             if (!category) {
                 throw new Error("Invalid category");
             }

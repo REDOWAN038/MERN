@@ -9,6 +9,7 @@ const userRoutes = require("../routes/userRoutes")
 const seedRoutes = require("../routes/seedRoutes")
 const authRoutes = require("../routes/authRoutes")
 const categoryRoutes = require("../routes/categoryRoutes")
+const productRoutes = require("../routes/productRoutes")
 
 const { errorResponse } = require("../handler/responseHandler")
 
@@ -30,6 +31,7 @@ app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/seed", seedRoutes)
 app.use("/api/v1/auth", authRoutes)
 app.use("/api/v1/categories", categoryRoutes)
+app.use("/api/v1/products", productRoutes)
 
 app.get("/test", (req, res) => {
     res.status(200).json({

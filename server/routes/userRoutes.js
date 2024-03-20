@@ -2,12 +2,12 @@ const express = require("express")
 const { getUsers, getSingleUser, registerUser, activateUserAccount, handleUpdateUser, handleBanUser, handleUnBanUser, handleDeleteUser, handleUpdatePassword, handleForgetPassword, handleResetPassword } = require("../controllers/userControllers")
 const { validateUserRegistration, validateUpdatePasswordLogin, validateUserForgetPassword, validateUserResetPassword } = require("../middlewares/validation")
 const { runValidation } = require("../middlewares")
-const { uploadUserImage } = require("../middlewares/uploadingUserImage")
+const { uploadImage } = require("../middlewares/uploadingImage")
 const { isLoggedIn, isLoggedOut, isAdmin } = require("../middlewares/auth")
 const router = express.Router()
 
 // register an user
-router.post("/register", uploadUserImage.single("image"), isLoggedOut, validateUserRegistration, runValidation, registerUser)
+router.post("/register", uploadImage.single("image"), isLoggedOut, validateUserRegistration, runValidation, registerUser)
 
 // activate user account
 router.post("/activate", isLoggedOut, activateUserAccount)
@@ -31,7 +31,7 @@ router.get("/:id", isLoggedIn, getSingleUser)
 router.delete("/:id", isLoggedIn, handleDeleteUser)
 
 // update user
-router.put("/:id", uploadUserImage.single("image"), isLoggedIn, handleUpdateUser)
+router.put("/:id", uploadImage.single("image"), isLoggedIn, handleUpdateUser)
 
 // ban user
 router.put("/ban-user/:id", isLoggedIn, isAdmin, handleBanUser)
