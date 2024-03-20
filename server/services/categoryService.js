@@ -21,6 +21,26 @@ const createCategoryService = async (name) => {
     }
 }
 
+// get categories
+const getCategoriesService = async () => {
+    try {
+        return await categoryModel.find({}).select("name slug").lean()
+    } catch (error) {
+        throw error
+    }
+}
+
+// get category
+const getCategoryService = async (slug) => {
+    try {
+        return await categoryModel.find({ slug }).select("name slug").lean()
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
-    createCategoryService
+    createCategoryService,
+    getCategoriesService,
+    getCategoryService
 }
