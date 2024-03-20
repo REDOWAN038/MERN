@@ -1,6 +1,6 @@
 const categoryModel = require("../models/categoryModel")
 const { successResponse } = require("../handler/responseHandler")
-const { createCategoryService, getCategoriesService, getCategoryService, updateCategoryService } = require("../services/categoryService")
+const { createCategoryService, getCategoriesService, getCategoryService, updateCategoryService, deleteCategoryService, deleteCategoriesService } = require("../services/categoryService")
 
 // creating category
 const handleCreateCategory = async (req, res, next) => {
@@ -64,9 +64,38 @@ const handleUpdateCategory = async (req, res, next) => {
     }
 }
 
+// delete category
+const handleDeleteCategory = async (req, res, next) => {
+    try {
+        const { slug } = req.params
+        await deleteCategoryService(slug)
+        return successResponse(res, {
+            statusCode: 200,
+            message: "category deleted successfully",
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// delete categorries
+const handleDeleteCategories = async (req, res, next) => {
+    try {
+        await deleteCategoriesService()
+        return successResponse(res, {
+            statusCode: 200,
+            message: "categories deleted successfully",
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     handleCreateCategory,
     handleGetCategories,
     handleGetCategory,
-    handleUpdateCategory
+    handleUpdateCategory,
+    handleDeleteCategory,
+    handleDeleteCategories
 }

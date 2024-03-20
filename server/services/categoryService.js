@@ -61,9 +61,33 @@ const updateCategoryService = async (name, slug) => {
     }
 }
 
+// delete category
+const deleteCategoryService = async (slug) => {
+    try {
+        const deletedCategory = await categoryModel.findOneAndDelete({ slug })
+
+        if (!deletedCategory) {
+            throw createError(404, "no such category found")
+        }
+    } catch (error) {
+        throw error
+    }
+}
+
+// delete categorries
+const deleteCategoriesService = async () => {
+    try {
+        await categoryModel.deleteMany({})
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
     createCategoryService,
     getCategoriesService,
     getCategoryService,
-    updateCategoryService
+    updateCategoryService,
+    deleteCategoryService,
+    deleteCategoriesService
 }
