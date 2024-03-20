@@ -1,4 +1,5 @@
 const { body } = require("express-validator")
+const categoryModel = require("../models/categoryModel")
 
 // validate user registration input
 const validateUserRegistration = [
@@ -113,11 +114,66 @@ const validateCategory = [
         .withMessage("category name is required"),
 ]
 
+// validate product
+const validateProduct = [
+    body("name")
+        .trim()
+        .notEmpty()
+        .withMessage("product name is required"),
+    body("description")
+        .trim()
+        .notEmpty()
+        .withMessage("product description is required")
+        .isLength({ min: 10 }) // Ensure description has a minimum length of 10 characters
+        .withMessage("Description must be at least 10 characters long"),
+    body("price")
+        .notEmpty()
+        .withMessage("Product price is required")
+        .isNumeric()
+        .withMessage("Price must be a numeric value")
+        .isFloat({ min: 0 })
+        .withMessage("Price must be a non-negative value"),
+    body("quantity")
+        .notEmpty()
+        .withMessage("Product quantity is required")
+        .isNumeric()
+        .withMessage("Quantity must be a numeric value")
+        .isFloat({ min: 0 })
+        .withMessage("Quantity must be a non-negative value"),
+    body("sold")
+        .isNumeric()
+        .withMessage("Sold must be a numeric value")
+        .isFloat({ min: 0 })
+        .withMessage("Sold must be a non-negative value"),
+    body("shipping")
+        .isNumeric()
+        .withMessage("Shipping must be a numeric value")
+        .isFloat({ min: 0 })
+        .withMessage("Shipping must be a non-negative value"),
+    body("image")
+        .trim()
+        .notEmpty()
+        .withMessage("product image is required"),
+    body("category")
+        .trim()
+        .notEmpty()
+        .withMessage("Category is required")
+        .custom(async (value, { req }) => {
+            // Check if the category exists in the database
+            const category = await categoryModel.findOne({ name: value });
+            if (!category) {
+                throw new Error("Invalid category");
+            }
+            return true;
+        })
+]
+
 module.exports = {
     validateUserRegistration,
     validateUserLogin,
     validateUpdatePasswordLogin,
     validateUserForgetPassword,
     validateUserResetPassword,
-    validateCategory
+    validateCategory,
+    validateProduct
 }
