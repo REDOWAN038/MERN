@@ -105,10 +105,19 @@ const validateUserResetPassword = [
         })
 ]
 
+// validate category
+const validateCategory = [
+    body("name")
+        .trim()
+        .notEmpty()
+        .withMessage("category name is required"),
+]
+
 module.exports = {
     validateUserRegistration,
     validateUserLogin,
     validateUpdatePasswordLogin,
     validateUserForgetPassword,
-    validateUserResetPassword
+    validateUserResetPassword,
+    validateCategory
 }
