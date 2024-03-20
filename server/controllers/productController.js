@@ -1,6 +1,6 @@
 
 const { successResponse } = require("../handler/responseHandler")
-const { createProductService } = require("../services/productService")
+const { createProductService, getProductsService, getProductService } = require("../services/productService")
 
 // create product
 const handleCreateProduct = async (req, res, next) => {
@@ -20,6 +20,49 @@ const handleCreateProduct = async (req, res, next) => {
     }
 }
 
+// get products
+const handleGetProducts = async (req, res, next) => {
+    try {
+        const search = req.query.search || ""
+        const page = Number(req.query.page) || 1
+        const limit = Number(req.query.limit) || 5
+        const minPrice = Number(req.query.minPrice) || 0
+        const maxPrice = Number(req.query.maxPrice) || 100000000
+
+        const { products, pagination } = await getProductsService(search, page, limit, minPrice, maxPrice)
+
+        return successResponse(res, {
+            statusCode: 200,
+            message: "fetched all products",
+            payload: {
+                products,
+                pagination
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+// get single product
+const handleGetProduct = async (req, res, next) => {
+    try {
+        const { slug } = req.params
+        const product = await getProductService(slug)
+        return successResponse(res, {
+            statusCode: 200,
+            message: "product returned successfully",
+            payload: {
+                product
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
-    handleCreateProduct
+    handleCreateProduct,
+    handleGetProducts,
+    handleGetProduct
 }
