@@ -91,8 +91,34 @@ const getProductService = async (slug) => {
     }
 }
 
+// delete product
+const deleteProductService = async (slug) => {
+    try {
+        const product = await productModel.findOne({ slug })
+
+        if (!product) {
+            throw createError(404, "no such product found")
+        }
+
+        const productImagePath = product.image
+        const publicId = await getPublicId(productImagePath)
+
+        const { result } = await cloudinary.uploader.destroy(`MERN/products/${publicId}`)
+
+        if (result !== "ok") {
+            throw createError(400, "please try again")
+        }
+
+        await productModel.findOneAndDelete({ slug })
+
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
     createProductService,
     getProductsService,
-    getProductService
+    getProductService,
+    deleteProductService
 }

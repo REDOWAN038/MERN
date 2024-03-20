@@ -1,5 +1,5 @@
 const express = require("express")
-const { handleCreateProduct, handleGetProducts, handleGetProduct } = require("../controllers/productController")
+const { handleCreateProduct, handleGetProducts, handleGetProduct, handleDeleteProduct } = require("../controllers/productController")
 const { validateProduct } = require("../middlewares/validation")
 const { isLoggedIn, isAdmin } = require("../middlewares/auth")
 const { uploadImage } = require("../middlewares/uploadingImage")
@@ -14,5 +14,8 @@ router.get("/", handleGetProducts)
 
 // get product
 router.get("/:slug", handleGetProduct)
+
+// delete product
+router.delete("/:slug", isLoggedIn, isAdmin, handleDeleteProduct)
 
 module.exports = router
