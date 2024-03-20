@@ -33,7 +33,29 @@ const getCategoriesService = async () => {
 // get category
 const getCategoryService = async (slug) => {
     try {
-        return await categoryModel.find({ slug }).select("name slug").lean()
+        const category = await categoryModel.find({ slug }).select("name slug").lean()
+
+        if (!category) {
+            throw createError(404, "no such category found")
+        }
+
+        return category
+    } catch (error) {
+        throw error
+    }
+}
+
+// update category
+const updateCategoryService = async (name, slug) => {
+    try {
+        const updates = { name, slug: slugify(name) }
+        const options = { new: true }
+
+        const updatedCategory = await categoryModel.findOneAndUpdate({ slug }, updates, options)
+
+        if (!updatedCategory) {
+            throw createError(404, "no such category found")
+        }
     } catch (error) {
         throw error
     }
@@ -42,5 +64,6 @@ const getCategoryService = async (slug) => {
 module.exports = {
     createCategoryService,
     getCategoriesService,
-    getCategoryService
+    getCategoryService,
+    updateCategoryService
 }
