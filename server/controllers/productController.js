@@ -1,6 +1,6 @@
 
 const { successResponse } = require("../handler/responseHandler")
-const { createProductService, getProductsService, getProductService, deleteProductService } = require("../services/productService")
+const { createProductService, getProductsService, getProductService, deleteProductService, updateProductService } = require("../services/productService")
 
 // create product
 const handleCreateProduct = async (req, res, next) => {
@@ -75,9 +75,27 @@ const handleDeleteProduct = async (req, res, next) => {
     }
 }
 
+// update product
+const handleUpdateProduct = async (req, res, next) => {
+    try {
+        const { slug } = req.params
+        const updatedProduct = await updateProductService(slug, req)
+        return successResponse(res, {
+            statusCode: 200,
+            message: "product updated successfully",
+            payload: {
+                updatedProduct
+            }
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
 module.exports = {
     handleCreateProduct,
     handleGetProducts,
     handleGetProduct,
-    handleDeleteProduct
+    handleDeleteProduct,
+    handleUpdateProduct
 }

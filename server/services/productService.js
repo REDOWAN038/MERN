@@ -116,9 +116,65 @@ const deleteProductService = async (slug) => {
     }
 }
 
+// update product
+const updateProductService = async (slug, req) => {
+    try {
+        const product = await productModel.findOne({ slug })
+        if (!product) {
+            throw createError(404, "product not found")
+        }
+
+        const updateOptions = { new: true, runValidators: true, context: 'query' }
+        let updates = {}
+        const allowedFields = ['description', 'price', 'quantity', 'sold', 'shipping']
+
+        for (let key in req.body) {
+            if (allowedFields.includes(key)) {
+                updates[key] = req.body[key]
+            } else if (['name'].includes(key)) {
+                updates[key] = req.body[key]
+                updates["slug"] = slugify(req.body[key])
+            }
+        }
+
+        const image = req.file?.path
+
+        if (image) {
+            const response = await cloudinary.uploader.upload(image, {
+                folder: "MERN/products"
+            })
+            updates.image = response.secure_url
+
+            const publicId = await getPublicId(product.image)
+
+            const { result } = await cloudinary.uploader.destroy(`MERN/products/${publicId}`)
+
+            if (result !== "ok") {
+                throw createError(400, "please try again")
+            }
+        }
+
+        const updatedProduct = await productModel.findOneAndUpdate(
+            { slug },
+            updates,
+            updateOptions
+        )
+
+        if (!updatedProduct) {
+            throw createError(404, "no such product exist.")
+        }
+
+        return updatedProduct
+
+    } catch (error) {
+        throw error
+    }
+}
+
 module.exports = {
     createProductService,
     getProductsService,
     getProductService,
-    deleteProductService
+    deleteProductService,
+    updateProductService
 }
